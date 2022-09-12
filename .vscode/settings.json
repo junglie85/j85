@@ -1,0 +1,15 @@
+{
+    "cmake.sourceDirectory": "/Users/ashley/Personal/j85",
+    "files.associations": {
+        "*.txt": "cmake",
+        "cstdlib": "c",
+        "locale": "c",
+        "ostream": "c",
+        "new": "c",
+        "memory.h": "c",
+        "string.h": "c",
+        "stdio.h": "c",
+        "api_types.h": "c",
+        "stdint.h": "c"
+    }
+}
