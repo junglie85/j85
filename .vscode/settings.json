@@ -10,6 +10,7 @@
         "string.h": "c",
         "stdio.h": "c",
         "api_types.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "j85_api_types.h": "c"
     }
 }
