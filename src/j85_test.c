@@ -1,9 +1,20 @@
 #include "j85_test.h"
 
-#include "j85_assert.h"
-
+#include <setjmp.h>
+#include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+static jmp_buf jmp_ctx;
+
+static void signal_handler(int sig)
+{
+    if (sig != SIGABRT) {
+        raise(sig);
+    }
+    longjmp(jmp_ctx, 1);
+}
 
 void j85_test_set_out_buf_ptr(j85_test_case_t* tc, char** ptr) { tc->out_buf_ptr = ptr; }
 
@@ -14,11 +25,22 @@ void j85_test_run_test_case(j85_test_case_t* tc)
     }
 
     if (tc->test_fn) {
-        tc->test_fn(tc->data);
+        sig_t old_sigabrt = signal(SIGABRT, signal_handler);
+        if (old_sigabrt == SIG_ERR) {
+            abort();
+        }
+
+        bool test_pass = false;
+        if (setjmp(jmp_ctx) == 0) {
+            tc->test_fn(tc->data);
+            test_pass = true;
+        }
+
+        signal(SIGABRT, old_sigabrt);
 
         size_t size = 0;
         FILE* out = tc->out_buf_ptr ? open_memstream(tc->out_buf_ptr, &size) : stdout;
-        fprintf(out, "[ PASS ] --- %s\n", tc->name);
+        fprintf(out, "[ %s ] --- %s\n", test_pass ? "PASS" : "FAIL", tc->name);
         if (tc->out_buf_ptr) {
             fclose(out);
         }
@@ -29,7 +51,7 @@ void j85_test_run_test_case(j85_test_case_t* tc)
     }
 }
 
-static void fail() { j85_assert(false); }
+static void fail() { abort(); }
 
 void __j85_assert_true(bool x)
 {

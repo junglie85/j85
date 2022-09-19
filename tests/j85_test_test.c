@@ -4,11 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*
- * when assert(fales), we get a SIGABRT. How catch this and record test failure?
- * catch SIGSEV and report it (e.g. when accessing bad pointer address)?
- */
-
 typedef struct user_data {
     char msg[512];
 } user_data_t;
@@ -55,7 +50,7 @@ void test_case_test(void* data)
     j85_assert_str_eq(user_data.msg, "setup;test_method;teardown;");
 }
 
-void test_case_logging_test(void* data)
+void test_case_logging_passing_test(void* data)
 {
     char* buf;
 
@@ -68,6 +63,23 @@ void test_case_logging_test(void* data)
 
     j85_assert_str_eq(buf, "[ PASS ] --- test_system_under_test\n");
 }
+
+void test_case_logging_failing_test(void* data)
+{
+    char* buf;
+
+    user_data_t user_data = {};
+    j85_test_case_t tc
+        = j85_test_case_setup_teardown_user_data(test_system_under_test, NULL, NULL, &user_data);
+    j85_test_set_out_buf_ptr(&tc, &buf);
+
+    j85_test_run_test_case(&tc);
+
+    j85_assert_str_eq(buf, "[ FAIL ] --- test_system_under_test\n");
+    // TODO: Failure reason ...
+}
+
+void test_fails(void* data) { j85_assert_true(false); }
 
 int main(void)
 {
@@ -91,6 +103,14 @@ int main(void)
         test_system_under_test_setup, test_system_under_test_teardown, &user_data);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_case_logging_test);
+    tc = (j85_test_case_t)j85_test_case(test_case_logging_passing_test);
     j85_test_run_test_case(&tc);
+
+    tc = (j85_test_case_t)j85_test_case(test_case_logging_failing_test);
+    j85_test_run_test_case(&tc);
+
+    tc = (j85_test_case_t)j85_test_case(test_fails);
+    j85_test_run_test_case(&tc);
+
+    // TODO: Non-zero exit code for test failure?
 }
