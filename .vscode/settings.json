@@ -11,6 +11,7 @@
         "stdio.h": "c",
         "api_types.h": "c",
         "stdint.h": "c",
-        "j85_api_types.h": "c"
+        "j85_api_types.h": "c",
+        "setjmp.h": "c"
     }
 }

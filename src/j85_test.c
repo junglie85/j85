@@ -8,6 +8,23 @@
 
 static jmp_buf jmp_ctx;
 
+j85_test_case_t j85_test_create_test(const char* name, void (*test_fn)(void*),
+    void (*setup_fn)(void*), void (*teardown_fn)(void*), void* data)
+{
+    j85_test_case_t tc = {
+        .name = name,
+        .test_fn = test_fn,
+        .setup_fn = setup_fn,
+        .teardown_fn = teardown_fn,
+        .out_buf_ptr = NULL,
+        .data = data,
+    };
+
+    return tc;
+}
+
+void j85_test_set_out_buf_ptr(j85_test_case_t* tc, char** ptr) { tc->out_buf_ptr = ptr; }
+
 static void signal_handler(int sig)
 {
     if (sig != SIGABRT) {
@@ -15,8 +32,6 @@ static void signal_handler(int sig)
     }
     longjmp(jmp_ctx, 1);
 }
-
-void j85_test_set_out_buf_ptr(j85_test_case_t* tc, char** ptr) { tc->out_buf_ptr = ptr; }
 
 void j85_test_run_test_case(j85_test_case_t* tc)
 {

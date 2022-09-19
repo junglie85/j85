@@ -10,6 +10,18 @@ typedef struct user_data {
 
 void system_under_test(user_data_t* user_data) { strcat(user_data->msg, "test_method;"); }
 
+void test_sut_setup(void* data)
+{
+    user_data_t* user_data = (user_data_t*)data;
+    strcat(user_data->msg, "setup;");
+}
+
+void test_sut_teardown(void* data)
+{
+    user_data_t* user_data = (user_data_t*)data;
+    strcat(user_data->msg, "teardown;");
+}
+
 void test_system_under_test(void* data)
 {
     user_data_t* user_data = (user_data_t*)data;
@@ -27,23 +39,11 @@ void test_assert_strings_equal(void* data) { j85_assert_str_eq("a string", "a st
 
 void test_assert_strings_not_equal(void* data) { j85_assert_str_ne("a string", "b string"); }
 
-void test_system_under_test_setup(void* data)
-{
-    user_data_t* user_data = (user_data_t*)data;
-    strcat(user_data->msg, "setup;");
-}
-
-void test_system_under_test_teardown(void* data)
-{
-    user_data_t* user_data = (user_data_t*)data;
-    strcat(user_data->msg, "teardown;");
-}
-
 void test_case_test(void* data)
 {
     user_data_t user_data = {};
-    j85_test_case_t tc = j85_test_case_setup_teardown_user_data(test_system_under_test,
-        test_system_under_test_setup, test_system_under_test_teardown, &user_data);
+    j85_test_case_t tc = j85_test_case_setup_teardown_state(
+        test_system_under_test, test_sut_setup, test_sut_teardown, &user_data);
 
     j85_test_run_test_case(&tc);
 
@@ -55,8 +55,8 @@ void test_case_logging_passing_test(void* data)
     char* buf;
 
     user_data_t user_data = {};
-    j85_test_case_t tc = j85_test_case_setup_teardown_user_data(
-        test_system_under_test, test_system_under_test_setup, NULL, &user_data);
+    j85_test_case_t tc = j85_test_case_setup_teardown_state(
+        test_system_under_test, test_sut_setup, NULL, &user_data);
     j85_test_set_out_buf_ptr(&tc, &buf);
 
     j85_test_run_test_case(&tc);
@@ -69,8 +69,7 @@ void test_case_logging_failing_test(void* data)
     char* buf;
 
     user_data_t user_data = {};
-    j85_test_case_t tc
-        = j85_test_case_setup_teardown_user_data(test_system_under_test, NULL, NULL, &user_data);
+    j85_test_case_t tc = j85_test_case_state(test_system_under_test, &user_data);
     j85_test_set_out_buf_ptr(&tc, &buf);
 
     j85_test_run_test_case(&tc);
@@ -86,30 +85,30 @@ int main(void)
     j85_test_case_t tc = j85_test_case(test_assert_true);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_assert_false);
+    tc = j85_test_case(test_assert_false);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_assert_strings_equal);
+    tc = j85_test_case(test_assert_strings_equal);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_assert_strings_not_equal);
+    tc = j85_test_case(test_assert_strings_not_equal);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_case_test);
+    tc = j85_test_case(test_case_test);
     j85_test_run_test_case(&tc);
 
     user_data_t user_data = {};
-    tc = (j85_test_case_t)j85_test_case_setup_teardown_user_data(test_system_under_test,
-        test_system_under_test_setup, test_system_under_test_teardown, &user_data);
+    tc = j85_test_case_setup_teardown_state(
+        test_system_under_test, test_sut_setup, test_sut_teardown, &user_data);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_case_logging_passing_test);
+    tc = j85_test_case(test_case_logging_passing_test);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_case_logging_failing_test);
+    tc = j85_test_case(test_case_logging_failing_test);
     j85_test_run_test_case(&tc);
 
-    tc = (j85_test_case_t)j85_test_case(test_fails);
+    tc = j85_test_case(test_fails);
     j85_test_run_test_case(&tc);
 
     // TODO: Non-zero exit code for test failure?
