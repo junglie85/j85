@@ -57,19 +57,16 @@ void test_case_test(void* data)
 
 void test_case_logging_test(void* data)
 {
-    char buf[512] = {};
-    FILE* out = fmemopen(buf, 512, "a");
+    char* buf;
 
     user_data_t user_data = {};
     j85_test_case_t tc = j85_test_case_setup_teardown_user_data(
         test_system_under_test, test_system_under_test_setup, NULL, &user_data);
-    j85_test_set_log_file(&tc, out);
+    j85_test_set_out_buf_ptr(&tc, &buf);
 
     j85_test_run_test_case(&tc);
 
     j85_assert_str_eq(buf, "[ PASS ] --- test_system_under_test\n");
-
-    fclose(out);
 }
 
 int main(void)

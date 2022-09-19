@@ -5,9 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-void j85_log_fn(const char* msg) { fprintf(stdout, ""); }
-
-void j85_test_set_log_file(j85_test_case_t* tc, FILE* f) { tc->log_file = f; }
+void j85_test_set_out_buf_ptr(j85_test_case_t* tc, char** ptr) { tc->out_buf_ptr = ptr; }
 
 void j85_test_run_test_case(j85_test_case_t* tc)
 {
@@ -17,7 +15,13 @@ void j85_test_run_test_case(j85_test_case_t* tc)
 
     if (tc->test_fn) {
         tc->test_fn(tc->data);
-        fprintf(tc->log_file, "[ PASS ] --- %s\n", tc->name);
+
+        size_t size = 0;
+        FILE* out = tc->out_buf_ptr ? open_memstream(tc->out_buf_ptr, &size) : stdout;
+        fprintf(out, "[ PASS ] --- %s\n", tc->name);
+        if (tc->out_buf_ptr) {
+            fclose(out);
+        }
     }
 
     if (tc->teardown_fn) {
