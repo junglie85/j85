@@ -2,29 +2,35 @@
 
 #include "j85_api_types.h"
 
+#include <stdio.h>
+
 #define j85_test_case(fn)                                                                         \
     {                                                                                             \
-        (fn), NULL, NULL, NULL                                                                    \
+        (#fn), (fn), NULL, NULL, stdout, NULL                                                     \
     }
 
 #define j85_test_case_user_data(fn, data)                                                         \
     {                                                                                             \
-        (fn), NULL, NULL, (data)                                                                  \
+        (#fn), (fn), NULL, NULL, stdout, (data)                                                   \
     }
 
 #define j85_test_case_setup_teardown_user_data(fn, setup, teardown, data)                         \
     {                                                                                             \
-        (fn), (setup), (teardown), (data)                                                         \
+        (#fn), (fn), (setup), (teardown), stdout, (data)                                          \
     }
 
 typedef struct j85_test_case {
+    const char* name;
     void (*test_fn)(void*);
     void (*setup_fn)(void*);
     void (*teardown_fn)(void*);
+    FILE* log_file;
     void* data;
 } j85_test_case_t;
 
-void run_test_case(j85_test_case_t* tc);
+void j85_test_set_log_file(j85_test_case_t* tc, FILE* f);
+
+void j85_test_run_test_case(j85_test_case_t* tc);
 
 void __j85_assert_true(bool x);
 #define j85_assert_true(x) __j85_assert_true((x))

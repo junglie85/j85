@@ -2,9 +2,14 @@
 
 #include "j85_assert.h"
 
+#include <stdio.h>
 #include <string.h>
 
-void run_test_case(j85_test_case_t* tc)
+void j85_log_fn(const char* msg) { fprintf(stdout, ""); }
+
+void j85_test_set_log_file(j85_test_case_t* tc, FILE* f) { tc->log_file = f; }
+
+void j85_test_run_test_case(j85_test_case_t* tc)
 {
     if (tc->setup_fn) {
         tc->setup_fn(tc->data);
@@ -12,6 +17,7 @@ void run_test_case(j85_test_case_t* tc)
 
     if (tc->test_fn) {
         tc->test_fn(tc->data);
+        fprintf(tc->log_file, "[ PASS ] --- %s\n", tc->name);
     }
 
     if (tc->teardown_fn) {

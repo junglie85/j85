@@ -50,30 +50,50 @@ void test_case_test(void* data)
     j85_test_case_t tc = j85_test_case_setup_teardown_user_data(test_system_under_test,
         test_system_under_test_setup, test_system_under_test_teardown, &user_data);
 
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
 
     j85_assert_str_eq(user_data.msg, "setup;test_method;teardown;");
+}
+
+void test_case_logging_test(void* data)
+{
+    char buf[512] = {};
+    FILE* out = fmemopen(buf, 512, "a");
+
+    user_data_t user_data = {};
+    j85_test_case_t tc = j85_test_case_setup_teardown_user_data(
+        test_system_under_test, test_system_under_test_setup, NULL, &user_data);
+    j85_test_set_log_file(&tc, out);
+
+    j85_test_run_test_case(&tc);
+
+    j85_assert_str_eq(buf, "[ PASS ] --- test_system_under_test\n");
+
+    fclose(out);
 }
 
 int main(void)
 {
     j85_test_case_t tc = j85_test_case(test_assert_true);
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
 
     tc = (j85_test_case_t)j85_test_case(test_assert_false);
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
 
     tc = (j85_test_case_t)j85_test_case(test_assert_strings_equal);
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
 
     tc = (j85_test_case_t)j85_test_case(test_assert_strings_not_equal);
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
 
     tc = (j85_test_case_t)j85_test_case(test_case_test);
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
 
     user_data_t user_data = {};
     tc = (j85_test_case_t)j85_test_case_setup_teardown_user_data(test_system_under_test,
         test_system_under_test_setup, test_system_under_test_teardown, &user_data);
-    run_test_case(&tc);
+    j85_test_run_test_case(&tc);
+
+    tc = (j85_test_case_t)j85_test_case(test_case_logging_test);
+    j85_test_run_test_case(&tc);
 }
