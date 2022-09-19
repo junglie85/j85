@@ -42,8 +42,8 @@ void test_assert_strings_not_equal(void* data) { j85_assert_str_ne("a string", "
 void test_case_test(void* data)
 {
     user_data_t user_data = {};
-    j85_test_case_t tc = j85_test_case_setup_teardown_state(
-        test_system_under_test, test_sut_setup, test_sut_teardown, &user_data);
+    j85_test_case_t tc
+        = j85_test_case_setup_teardown_state(test_system_under_test, test_sut_setup, test_sut_teardown, &user_data);
 
     j85_test_run_test_case(&tc);
 
@@ -55,8 +55,7 @@ void test_case_logging_passing_test(void* data)
     char* buf;
 
     user_data_t user_data = {};
-    j85_test_case_t tc = j85_test_case_setup_teardown_state(
-        test_system_under_test, test_sut_setup, NULL, &user_data);
+    j85_test_case_t tc = j85_test_case_setup_teardown_state(test_system_under_test, test_sut_setup, NULL, &user_data);
     j85_test_set_out_buf_ptr(&tc, &buf);
 
     j85_test_run_test_case(&tc);
@@ -98,8 +97,7 @@ int main(void)
     j85_test_run_test_case(&tc);
 
     user_data_t user_data = {};
-    tc = j85_test_case_setup_teardown_state(
-        test_system_under_test, test_sut_setup, test_sut_teardown, &user_data);
+    tc = j85_test_case_setup_teardown_state(test_system_under_test, test_sut_setup, test_sut_teardown, &user_data);
     j85_test_run_test_case(&tc);
 
     tc = j85_test_case(test_case_logging_passing_test);

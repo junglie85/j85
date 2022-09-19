@@ -8,8 +8,8 @@
 
 static jmp_buf jmp_ctx;
 
-j85_test_case_t j85_test_create_test(const char* name, void (*test_fn)(void*),
-    void (*setup_fn)(void*), void (*teardown_fn)(void*), void* data)
+j85_test_case_t j85_test_create_test(
+    const char* name, void (*test_fn)(void*), void (*setup_fn)(void*), void (*teardown_fn)(void*), void* data)
 {
     j85_test_case_t tc = {
         .name = name,
